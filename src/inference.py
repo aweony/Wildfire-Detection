@@ -4,13 +4,16 @@ import cv2
 import torch
 from PIL import Image
 from multiclass.multi_model import MultiClassModel
-from preprocessing import test_transform
+from multi_preprocessing import test_transform
+from multiclass.train_multi import train_loop
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 CLASS_NAMES = ["fire", "no fire", "smoke", "active fire"]
 DEFAULT_MODEL_PATH = Path(__file__).parent / "model.pth"
-DEFAULT_IMAGE_PATH = Path(__file__).parent / "fire.jpg"
+DEFAULT_IMAGE_PATH = Path(__file__).parent / "no fire.jpg"
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
 
 def load_model(model_path: Path = DEFAULT_MODEL_PATH) -> MultiClassModel:
     if not Path(model_path).exists():
@@ -22,7 +25,7 @@ def load_model(model_path: Path = DEFAULT_MODEL_PATH) -> MultiClassModel:
     # Create a MultiClassModel object
     model = MultiClassModel(num_classes=len(CLASS_NAMES), freeze_backbone=False)
     # Load saved weights
-    model.load_state_dict(torch.load(model_path, map_location="cpu"))
+    model.load_state_dict(torch.load(model_path, map_location=device))
     # Put model into evaluation mode
     model.eval()
     return model
