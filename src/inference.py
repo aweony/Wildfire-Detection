@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 CLASS_NAMES = ["fire", "no fire", "smoke", "active fire"]
 DEFAULT_MODEL_PATH = Path(__file__).parent / "model.pth"
-DEFAULT_IMAGE_PATH = Path(__file__).parent / "no fire.jpg"
+DEFAULT_IMAGE_PATH = Path(__file__).parent / "fog.jpg"
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
@@ -52,9 +52,12 @@ def predict_frame(frame, model: MultiClassModel) -> str:
 
     with torch.inference_mode():
         logits = model(tensor)
+        confidence = torch.softmax(logits, dim=1).max().item()
         pred_idx = torch.argmax(logits, dim=1).item()
 
     prediction = CLASS_NAMES[pred_idx]
+    if prediction == "smoke" and confidence <= 0.8:
+        prediction = "no fire"
     logging.info(f"Prediction for current frame: {prediction}")
     return prediction
 
