@@ -1,7 +1,7 @@
 import cv2
 import logging
 from inference import predict_frame, load_model, DEFAULT_MODEL_PATH
-
+from detection.person_animal_detect import detect_person_animal
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
@@ -27,10 +27,10 @@ while True:
 
     # predict the class of the current frame
     prediction = predict_frame(frame, model)
-
+    dect_frame = detect_person_animal(frame, prediction)
     # overlay the prediction on the frame
-    cv2.putText(frame, prediction, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.imshow("WildFire Detection Camera", frame)
+    cv2.putText(dect_frame, prediction, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.imshow("WildFire Detection Camera", dect_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         logging.info("Camera turned off")
