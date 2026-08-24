@@ -1,6 +1,14 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import torch
-from binary.binary_model import BinaryModel, loss_fn
+from binary_model import BinaryModel, loss_fn
 from preprocessing import train_loader, test_loader
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+MODEL_PATH = Path(__file__).parent.parent / "model.pth"
 
 torch.manual_seed(42)
 
@@ -50,6 +58,9 @@ def train_loop():
         train_acc /= len(train_loader)
         print(f"Epoch {epoch+1}/{EPOCHS} | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}%")
 
+    torch.save(model.state_dict(), MODEL_PATH)
+    logging.info(f"Model saved to {MODEL_PATH}")
+
 # test loop
 def test_loop():
     model.eval()
@@ -68,6 +79,5 @@ def test_loop():
     print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}% | Metrics: {test_metrics}")
 
 if __name__ == '__main__':
-    print(device)
     train_loop()
     test_loop()

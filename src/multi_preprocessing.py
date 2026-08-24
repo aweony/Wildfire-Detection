@@ -30,10 +30,30 @@ test_transform = transforms.Compose([
     )
 ])
 
-# gets the image from the data folder 
+# gets the image from the data folder
 train_dataset = datasets.ImageFolder(DATA_DIR / "train", transform=train_transform)
+val_dataset = datasets.ImageFolder(DATA_DIR / "val", transform=test_transform)
 test_dataset = datasets.ImageFolder(DATA_DIR / "test", transform=test_transform)
+
+# The raw dataset has 4 folders (fire, nofire, smoke, smokefire) but "fire" and
+# "smokefire" (active fire) are too visually similar to separate reliably, so
+# they're merged into a single "fire" class here. ImageFolder always assigns
+# indices alphabetically, so class_to_idx is identical across the train/val/test
+# splits (same folder names) and this mapping applies to all three.
+_ACTIVE_FIRE_INDEX = train_dataset.class_to_idx["smokefire"]
+_FIRE_INDEX = train_dataset.class_to_idx["fire"]
+
+
+def _merge_active_fire_into_fire(raw_index: int) -> int:
+    return _FIRE_INDEX if raw_index == _ACTIVE_FIRE_INDEX else raw_index
+
+
+for dataset in (train_dataset, val_dataset, test_dataset):
+    dataset.target_transform = _merge_active_fire_into_fire
+
+CLASS_NAMES = ["fire", "no fire", "smoke"]
 
 # Loads the dataset
 train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
+val_loader = DataLoader(dataset=val_dataset, batch_size=64, shuffle=False)
 test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
