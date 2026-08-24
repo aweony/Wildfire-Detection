@@ -3,14 +3,12 @@ from pathlib import Path
 import cv2
 import torch
 from PIL import Image
-from multiclass.multi_model import MultiClassModel
-from multi_preprocessing import test_transform
-from multiclass.train_multi import train_loop
+from src.multiclass.multi_model import MultiClassModel
+from src.multi_preprocessing import test_transform, CLASS_NAMES
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-CLASS_NAMES = ["fire", "no fire", "smoke", "active fire"]
-DEFAULT_MODEL_PATH = Path(__file__).parent / "model.pth"
+DEFAULT_MODEL_PATH = Path(__file__).parent / "model" / "model.pth"
 DEFAULT_IMAGE_PATH = Path(__file__).parent / "fog.jpg"
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
